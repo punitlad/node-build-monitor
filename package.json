@@ -17,6 +17,7 @@
     "async": "1.5.2",
     "errorhandler": "1.4.3",
     "express": "4.13.4",
+    "httpntlm": "^1.7.4",
     "jade": "1.11.0",
     "moment": "2.11.2",
     "morgan": "1.6.1",

@@ -1,4 +1,5 @@
 var request = require('request');
+var ntlm = require('httpntlm');
 
 module.exports = function () {
     var self = this,
@@ -12,16 +13,27 @@ module.exports = function () {
             return baseUrl;
         },
         makeRequest = function (url, callback) {
-            request({
-                'url': url,
-                'rejectUnauthorized': false,
-                'headers': { 'Accept': 'application/json' },
-                'json' : true,
-                'auth': { 'user': self.configuration.username, 'pass': self.configuration.password }
-                },
-                function(error, response, body) {
+            if (self.configuration.authentication.trim() === 'ntlm') {
+                ntlm.get({
+                    'url': url,
+                    'username': self.configuration.username,
+                    'password': self.configuration.password
+                }, function (error, response) {
+                    var body = JSON.parse(response.body)
                     callback(error, body);
-            });
+                });
+            } else {
+                request({
+                        'url': url,
+                        'rejectUnauthorized': false,
+                        'headers': { 'Accept': 'application/json' },
+                        'json': true,
+                        'auth': { 'user': self.configuration.username, 'pass': self.configuration.password }
+                    },
+                    function (error, response, body) {
+                        callback(error, body);
+                    });
+            }
         },
         parseDate = function (dateAsString) {
             return dateAsString ? new Date(dateAsString) : null;
@@ -32,7 +44,7 @@ module.exports = function () {
             }
         },
         isNullOrWhiteSpace = function (string) {
-            if(!string) {
+            if (!string) {
                 return true;
             }
 
@@ -76,8 +88,8 @@ module.exports = function () {
         queryBuilds = function (callback) {
             makeRequest(makeUrl('/Builds', '$top=30'), function (error, body) {
                 if (error) {
-                  callback(error);
-                  return;
+                    callback(error);
+                    return;
                 }
 
                 var builds = [];

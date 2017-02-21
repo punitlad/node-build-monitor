@@ -86,7 +86,7 @@ module.exports = function () {
             };
         },
         queryBuilds = function (callback) {
-            makeRequest(makeUrl('/Builds', '$top=30'), function (error, body) {
+            makeRequest(makeUrl('/Builds', '$top=30&definitions=' + self.configuration.definition), function (error, body) {
                 if (error) {
                     callback(error);
                     return;

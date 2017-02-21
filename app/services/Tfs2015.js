@@ -86,19 +86,28 @@ module.exports = function () {
             };
         },
         queryBuilds = function (callback) {
-            makeRequest(makeUrl('/Builds', '$top=30&definitions=' + self.configuration.definition), function (error, body) {
+            makeRequest(makeUrl('/Definitions', 'name=' + self.configuration.definition), function (error, body) {
                 if (error) {
                     callback(error);
                     return;
                 }
 
-                var builds = [];
+                for (var i = 0; i < body.value.length; i++) {
+                    makeRequest(makeUrl('/Builds', '$top=30&definitions=' + body.value[i].id), function (error, body) {
+                        if (error) {
+                            callback(error);
+                            return;
+                        }
 
-                forEachResult(body, function (res) {
-                    builds.push(simplifyBuild(res));
-                });
+                        var builds = [];
 
-                callback(error, builds);
+                        forEachResult(body, function (res) {
+                            builds.push(simplifyBuild(res));
+                        });
+
+                        callback(error, builds);
+                    });
+                }
             });
         };
 
